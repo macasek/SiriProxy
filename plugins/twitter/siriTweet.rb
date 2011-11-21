@@ -1,4 +1,5 @@
 require 'rubygems'
+$KCODE='u'
 require 'tweaksiri'
 require 'siriobjectgenerator'
 require 'twitter'
@@ -14,12 +15,14 @@ require 'twitter'
 class SiriTweet < SiriPlugin
 
 	def initialize()
+	  tokens = YAML::load(File.open('plugins/twitter/twitter.yml')) 
+  
 		@state = :DEFAULT_STATE 
 		Twitter.configure do |config|
-		  config.consumer_key = "YOUR KEY" 
-		  config.consumer_secret = "YOUR SECRET"
-		  config.oauth_token = "YOUR TOKEN" 
-		  config.oauth_token_secret = "YOUR TOKEN SECRET"
+		  config.consumer_key = tokens['consumer_key'] 
+		  config.consumer_secret = tokens['consumer_secret']
+		  config.oauth_token = tokens['oauth_token'] 
+		  config.oauth_token_secret = tokens['oauth_token_secret']
 		end 
 
 		@twitterClient= Twitter::Client.new
@@ -76,7 +79,7 @@ class SiriTweet < SiriPlugin
 	# This is called whenever the server recognizes speech. It's useful for overriding commands that Siri would otherwise recognize
 	def speech_recognized(object, connection, phrase)
 		if @state == :DEFAULT_STATE 
-			if phrase.match(/^tweet (.+)/i)
+			if phrase.match(/^tweet (.+)/i) 		    		  
 				self.plugin_manager.block_rest_of_session_from_server
 				@state = :CONFIRM_STATE
 				@tweetText = $1

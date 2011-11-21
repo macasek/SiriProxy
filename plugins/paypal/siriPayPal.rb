@@ -1,25 +1,18 @@
 require 'tweakSiri'
 require 'siriObjectGenerator'
 
-#######
-# This is a "hello world" style plugin. It simply intercepts the phrase "text siri proxy" and responds
-# with a message about the proxy being up and running. This is good base code for other plugins.
-# 
-# Remember to add other plugins to the "start.rb" file if you create them!
-######
-
 class SiriPayPal < SiriPlugin
   def initialize
     @state = :DEFAULT
   end
   
-  def generate_msg_response(refId, text="")
+  def generate_msg_response(refId, amount, to)
     object = SiriAddViews.new
 		object.make_root(refId)
 
 		answer = SiriAnswer.new("PayPal", [
-			SiriAnswerLine.new('logo','http://cl.ly/1l040J1A392n0M1n1g35/content'), # this just makes things looks nice, but is obviously specific to my username
-			SiriAnswerLine.new(text)
+			SiriAnswerLine.new('logo','https://www.paypal.com/en_US/i/logo/paypal_logo.gif'),
+			SiriAnswerLine.new("#{amount} to #{to}")
 		])
 		confirmationOptions = SiriConfirmationOptions.new(
 			[SiriSendCommands.new([SiriConfirmSnippetCommand.new(),SiriStartRequest.new("yes",false,true)])],
@@ -82,19 +75,22 @@ puts "recognized command!!"
   end
   
   def respond_to(object, connection, phrase)
+puts object.inspect    
     if @state == :DEFAULT
-      if phrase.match /^paypal (.+)/i
+      # only handles US currency
+      if phrase.match(/^send (\$(\d{1,3}(\,\d{3})*|(\d+))(\.\d{2})?) to (.+)$/i) || phrase.match(/^paypal (.+)/i)
         self.plugin_manager.block_rest_of_session_from_server
 				@state = :CONFIRM
-				@msg = $1
-				return self.generate_msg_response(connection.lastRefId, $1);
+				@amount = $1
+				@to = $6
+				return self.generate_msg_response(connection.lastRefId, @amount, @to);
       end 
     elsif @state == :CONFIRM
       if phrase.match(/yes/i)
         self.plugin_manager.block_rest_of_session_from_server
  				@state = :DEFAULT
- 				## SEND MONEY!!
- 				return generate_siri_utterance(connection.lastRefId, "Ok sending money.")
+## TODO SEND MONEY!!
+ 				return generate_siri_utterance(connection.lastRefId, "Ok sending #{@amount} to #{@to}.")
       elsif phrase.match(/no/i)
         self.plugin_manager.block_rest_of_session_from_server
 				@state = :DEFAULT

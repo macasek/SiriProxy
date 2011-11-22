@@ -27,17 +27,18 @@ class SiriPayPal < SiriPlugin
 		object.to_hash
   end
   
-  def send_payment
+  def send_payment(amount, email)
     pay_request = PaypalAdaptive::Request.new('development')
-
+    
+    # just coppied from the gem doc for now...
     data = {
-    "returnUrl" => "http://testserver.com/payments/completed_payment_request", 
-    "requestEnvelope" => {"errorLanguage" => "en_US"},
-    "currencyCode"=>"USD",  
-    "receiverList"=>{"receiver"=>[{"email"=>"mercha_1320432403_biz@paypal.com", "amount"=>"10.00"}]},
-    "cancelUrl"=>"http://testserver.com/payments/canceled_payment_request",
-    "actionType"=>"PAY",
-    "ipnNotificationUrl"=>"http://testserver.com/payments/ipn_notification"
+      "returnUrl" => "http://testserver.com/payments/completed_payment_request",
+      "requestEnvelope" => {"errorLanguage" => "en_US"},
+      "currencyCode"=>"USD",  
+      "receiverList"=>{"receiver"=>[{"email"=>email, "amount"=>amount}]},
+      "cancelUrl"=>"http://testserver.com/payments/canceled_payment_request",
+      "actionType"=>"PAY",
+      "ipnNotificationUrl"=>"http://testserver.com/payments/ipn_notification"   
     }
 
     pay_response = pay_request.pay(data)
@@ -105,14 +106,16 @@ class SiriPayPal < SiriPlugin
 				@state = :CONFIRM
 				@amount = $1
 				@to = $6
+# TODO lookup person in address book and send to that email address.
+ 				@to_email = "mercha_1320432403_biz@paypal.com"
 				return self.generate_msg_response(connection.lastRefId, @amount, @to);
       end 
     elsif @state == :CONFIRM
       if phrase.match(/yes/i)
         self.plugin_manager.block_rest_of_session_from_server
  				@state = :DEFAULT
-        
-        send_payment
+       
+        send_payment(@to_email, @amount)
         
  				return generate_siri_utterance(connection.lastRefId, "Ok sending #{@amount} to #{@to}.")
       elsif phrase.match(/no/i)

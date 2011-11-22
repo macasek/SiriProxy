@@ -1,5 +1,6 @@
 server.passless.crt
 server.passless.key
 .DS_Store
-plugins/twitter/*.yml
+twitter.yml
+paypal_adaptive.yml
 ca

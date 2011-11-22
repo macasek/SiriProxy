@@ -27,6 +27,29 @@ class SiriPayPal < SiriPlugin
 		object.to_hash
   end
   
+  def send_payment
+    pay_request = PaypalAdaptive::Request.new('development')
+puts pay_request.inspect
+    data = {
+    "returnUrl" => "http://testserver.com/payments/completed_payment_request", 
+    "requestEnvelope" => {"errorLanguage" => "en_US"},
+    "currencyCode"=>"USD",  
+    "receiverList"=>{"receiver"=>[{"email"=>"mercha_1320432403_biz@paypal.com", "amount"=>"10.00"}]},
+    "cancelUrl"=>"http://testserver.com/payments/canceled_payment_request",
+    "actionType"=>"PAY",
+    "ipnNotificationUrl"=>"http://testserver.com/payments/ipn_notification"
+    }
+
+    pay_response = pay_request.pay(data)
+puts pay_response.inspect
+    if !pay_response.success?
+      puts pay_response.errors.first['message']
+      return false
+    end
+    
+    true
+  end
+  
   # This gets called every time an object is received from the Guzzoni server
   def object_from_guzzoni(object, connection) 
     object
@@ -89,7 +112,9 @@ puts object.inspect
       if phrase.match(/yes/i)
         self.plugin_manager.block_rest_of_session_from_server
  				@state = :DEFAULT
-## TODO SEND MONEY!!
+        
+        send_payment
+        
  				return generate_siri_utterance(connection.lastRefId, "Ok sending #{@amount} to #{@to}.")
       elsif phrase.match(/no/i)
         self.plugin_manager.block_rest_of_session_from_server

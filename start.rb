@@ -1,4 +1,9 @@
-#!/usr/bin/env ruby
+#!/usr/bin/env ruby 
+require 'rubygems'
+$KCODE='u' 
+require 'bundler'
+Bundler.require  
+
 # require 'plugins/thermostat/siriThermostat'
 require 'plugins/testproxy/testproxy'
 # require 'plugins/eliza/eliza'

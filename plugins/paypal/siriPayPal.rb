@@ -29,7 +29,7 @@ class SiriPayPal < SiriPlugin
   
   def send_payment
     pay_request = PaypalAdaptive::Request.new('development')
-puts pay_request.inspect
+
     data = {
     "returnUrl" => "http://testserver.com/payments/completed_payment_request", 
     "requestEnvelope" => {"errorLanguage" => "en_US"},
@@ -41,7 +41,7 @@ puts pay_request.inspect
     }
 
     pay_response = pay_request.pay(data)
-puts pay_response.inspect
+
     if !pay_response.success?
       puts pay_response.errors.first['message']
       return false
@@ -67,7 +67,7 @@ puts pay_response.inspect
     # 
     #   return generate_siri_utterance(connection.lastRefId, "Siri Proxy is up and running!")   
     # end 
-puts "unknown command!!"    
+  
     respond_to(object, connection, command) 
   end
 
@@ -93,12 +93,11 @@ puts "unknown command!!"
     # 
     #   return requestComplete.to_hash  
     # end
-puts "recognized command!!"      
+    
     respond_to(object, connection, phrase)
   end
   
-  def respond_to(object, connection, phrase)
-puts object.inspect    
+  def respond_to(object, connection, phrase)  
     if @state == :DEFAULT
       # only handles US currency
       if phrase.match(/^send (\$(\d{1,3}(\,\d{3})*|(\d+))(\.\d{2})?) to (.+)$/i) || phrase.match(/^paypal (.+)/i)

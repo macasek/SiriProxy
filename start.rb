@@ -1,6 +1,6 @@
 #!/usr/bin/env ruby 
 require 'rubygems'
-$LOAD_PATH << File.dirname(__FILE__)
+# $LOAD_PATH << File.dirname(__FILE__)
 $KCODE='u' #setting KCODE to unicode for Ruby 1.8
 require 'bundler'
 Bundler.require  

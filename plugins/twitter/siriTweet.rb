@@ -1,7 +1,6 @@
 require 'rubygems'
-$KCODE='u'
-require 'tweaksiri'
-require 'siriobjectgenerator'
+require 'tweakSiri'
+require 'siriObjectGenerator'
 require 'twitter'
 
 #######
